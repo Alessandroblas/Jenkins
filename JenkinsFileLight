@@ -1,0 +1,36 @@
+podTemplate(
+  cloud: 'openshift',
+  yaml:'''
+  apiVersion: v1
+  kind: Pod
+  spec:
+    serviceAccount: jenkins
+    containers:
+    - name: podman
+      image: quay.io/podman/stable
+      command: ['cat']
+      tty: true
+      alwaysPullImage: true
+    - name: helm
+      image: docker.io/alpine/helm
+      command: ['cat']
+      tty: true
+      alwaysPullImage: true
+    '''
+  ) {
+  node(POD_LABEL) {
+    def http_proxy = '172.31.145.147:8080'
+    def https_proxy  = '172.31.145.147:8080'
+
+    container('podman') {
+      stage('Clone Repo'){}
+      stage('Build Image') {}
+      stage("Push Image"){}
+      }
+    container('helm'){
+      sh "echo $http_proxy"
+      sh "curl -x 172.31.145.147:8080 github.kyndryl.net"
+      sh "curl github.kyndryl.net"
+      }
+    }
+  }
